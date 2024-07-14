@@ -3,7 +3,7 @@ import { Text } from "react-native";
 
 const Profile = () => {
   return (
-  <Text>Profile</Text>
+    <Text>Profile</Text>
   )
 }
 export default Profile;

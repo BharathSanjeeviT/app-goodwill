@@ -1,19 +1,35 @@
-import { useSession } from "@utils/AuthContext"
-import { Redirect, Stack } from "expo-router"
-import { Text } from "react-native";
+import { useSession } from "@utils/authStore";
+import { Redirect, Slot } from "expo-router";
+import { Pressable, SafeAreaView, Text } from 'react-native';
 
-const AppLayout = () => {
-    const { loading, session } = useSession();
+const Root = () => {
+  const { uid, loading } = useSession()
 
-    if(loading){
-        return <Text>Loading...</Text>
-    }
+  if (loading) {
+    return (
+      <Pressable
+        onPress={() => {
+          console.log(uid)
+        }}
+        style={{
+          marginTop: 500
+        }}
+      >
+        <Text>
+          Loading
+        </Text>
+      </Pressable >
+    )
+  }
 
-    if(!session){
-        return <Redirect href="/login"/>
-    }else{
-        return <Stack/>
-    }
-
+  if (uid) {
+    return (
+      <SafeAreaView>
+        <Slot />
+      </SafeAreaView>
+    )
+  } else {
+    return <Redirect href="/login" />
+  }
 }
-export default AppLayout;
+export default Root;

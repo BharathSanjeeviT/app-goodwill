@@ -1,12 +1,19 @@
-import { useSession } from '@utils/AuthContext';
+import { useSession } from '@utils/authStore';
 import React from 'react';
-import { Text } from 'react-native';
 
+import { Pressable, Text } from 'react-native';
 export default function App() {
-  const { signIn } = useSession();
+  const { uid, signIn } = useSession()
   return (
-    <Text>
-      Signout
-    </Text>
+    <Pressable
+      onPress={() => {
+        signIn(null)
+      }}
+      style={{
+        marginTop: 100
+      }}
+    >
+      <Text>Hello {uid}</Text>
+    </Pressable>
   )
 }
