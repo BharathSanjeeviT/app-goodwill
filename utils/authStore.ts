@@ -23,7 +23,7 @@ const useAuthStore = create<AuthType>((set) => ({
 
 const useSession = () => {
   const { uid, loading, signIn, setLoading } = useAuthStore();
-  const [[storageSession, storageLoading], setStorageSession] = useStorage('broker');
+  const [[storageSession, storageLoading], setStorageSession] = useStorage('gay');
 
   useEffect(() => {
     if (!storageLoading) {

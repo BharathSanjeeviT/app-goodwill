@@ -1,20 +1,17 @@
-import { useSession } from "@utils/authStore";
-import { Pressable, Text } from "react-native";
+import React  from 'react';
+import { ScrollView, View } from 'react-native';
+import { LoginLogo, LoginForm } from '@components/login'
 
-const Login = () => {
-  const { uid, signIn } = useSession()
+export default function App() {
+
   return (
-    <Pressable
-      onPress={() => {
-        signIn("hello")
-      }}
-      style={{
-        marginTop: 100
-      }}
-    >
-      <Text>Login {uid}</Text>
-    </Pressable>
+    <ScrollView>
+      <View
+        className='flex justify-center items-center h-[100vh] w-[100vw]'
+      >
+        <LoginLogo/>
+        <LoginForm/>
+      </View>
+    </ScrollView>
   )
 }
-
-export default Login;
