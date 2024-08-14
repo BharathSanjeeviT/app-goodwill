@@ -1,64 +1,74 @@
-import React, { useState } from "react";
+import React, { SetStateAction, useState } from "react";
 import { Text, View, TextInput, Pressable, KeyboardAvoidingView, ToastAndroid } from 'react-native';
 import { Loader } from "@components/LottieLoading"
-import { useSession } from "@utils/authStore";
 import { useRouter } from "expo-router";
+import axios from "axios";
+import { API_URL } from "@utils/config";
+import { useSession } from "@utils/store";
 
-export const LoginForm = () => {
+export const LoginForm = ({ setDetails, setUid }: { setDetails: React.Dispatch<SetStateAction<boolean>>, setUid: React.Dispatch<SetStateAction<string>> }) => {
 
+  const { signIn } = useSession()
   const [id, setId] = useState('');
   const [pass, setPass] = useState('')
   const [checking, setChecking] = useState(false)
-
-  const { signIn } = useSession()
   const router = useRouter()
 
-  const handleSubmit = (id: string, pass: string) => {
+  const handleSubmit = async (id: string, pass: string) => {
     if (!id || !pass) {
       ToastAndroid.show("ID or Password cannot be null", ToastAndroid.SHORT)
     } else {
       setChecking(true)
-
-      //API call to check the password
-      let login;
-      setTimeout(() => {
-        setChecking(false)
-        login = true;
-        if (!login) {
-          ToastAndroid.show("Password Wrong try again", ToastAndroid.SHORT)
+      try {
+        const { data } = await axios.post(
+          `${API_URL}/u/login`,
+          {
+            "mobile": id,
+            "password": pass
+          }
+        )
+        console.log(data)
+        if (data?.user?.adhaar_no === null || data?.user?.adhaar_no === "") {
+          setUid(data?.user?.u_id)
+          setDetails(true)
         } else {
-          signIn(id)
-          router.push("/")
+          signIn(data?.user?.u_id)
         }
-      }, 3000)
-
+      } catch (err) {
+        if (axios.isAxiosError(err) && err.response?.status == 400) {
+          ToastAndroid.show("Password or Phone number doesnot match", ToastAndroid.SHORT)
+        }
+        console.log(err)
+      }
+      setChecking(false)
     }
   }
 
   return (
     <View
-      className='w-full bg-[#f8d7bf] rounded-t-[50px] items-center py-16'
+      className='w-full bg-[#ede3da] border-4 items-center py-10'
     >
-      {checking && <Loader/>}
+      {checking && <Loader content="Verifying..." />}
       <KeyboardAvoidingView behavior='height' className='w-full gap-8 items-center'>
-        <View className='w-10/12 gap-y-3'>
+        <View className='w-10/12 gap-y-2'>
           <Text className='text-lg font-semibold'>
-            User Id
+            Phone number
           </Text>
           <TextInput
-            className='p-3 text-lg rounded-xl bg-white'
+            className='p-3 text-lg bg-[#fff8f3] rounded-lg'
             editable={!checking}
-            placeholder='Username'
+            keyboardType="phone-pad"
+            placeholder='+91'
             onChangeText={setId}
             value={id}
           />
         </View>
-        <View className='w-10/12 gap-y-3'>
+        <View className='w-10/12 gap-y-2'>
           <Text className='text-lg font-semibold'>
             Password
           </Text>
           <TextInput
-            className='p-3 text-lg rounded-xl bg-white'
+            className='p-3 text-lg bg-[#fff8f3] rounded-lg'
             editable={!checking}
             placeholder='Password'
             secureTextEntry={true}
@@ -69,7 +79,7 @@ export const LoginForm = () => {
         <Pressable
           onPress={() => handleSubmit(id, pass)}
           disabled={checking}
-          className='w-10/12 rounded-xl mt-3 px-2 py-3 bg-[#ff8731]'
+          className='w-10/12 mt-3 px-2 py-3 bg-[#ff8732] rounded-lg'
         >
           <Text className='text-xl text-center text-white font-semibold'>
             Submit

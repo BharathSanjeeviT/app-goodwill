@@ -27,8 +27,10 @@
     },
     "plugins": [
       "expo-router",
-      "expo-secure-store"
-    ],
+      "expo-secure-store",
+      "expo-image-picker", 
+      "expo-location",
+   ],
     "extra": {
       "router": {
         "origin": false

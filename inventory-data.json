@@ -1,0 +1,55 @@
+[
+  {
+    "id": "1",
+    "name": "Cement",
+    "quantity": 50,
+    "image": "https://fastly.picsum.photos/id/769/200/200.jpg?hmac=M55kAfuYOrcJ8a49hBRDhWtVLbJo88Y76kUz323SqLU"
+  },
+  {
+    "id": "2",
+    "name": "Bricks",
+    "quantity": 100,
+    "image": "https://fastly.picsum.photos/id/770/200/200.jpg?hmac=J9"
+  },
+  {
+    "id": "3",
+    "name": "Sand",
+    "quantity": 200,
+    "image": "https://fastly.picsum.photos/id/771/200/200.jpg?hmac=J9"
+  },
+  {
+    "id": "4",
+    "name": "Steel",
+    "quantity": 150,
+    "image": "https://fastly.picsum.photos/id/772/200/200.jpg?hmac=J9"
+  },
+  {
+    "id": "5",
+    "name": "Wood",
+    "quantity": 300,
+    "image": "https://fastly.picsum.photos/id/773/200/200.jpg?hmac=J9"
+  },
+  {
+    "id": "6",
+    "name": "Tiles",
+    "quantity": 250,
+    "image": "https://fastly.picsum.photos/id/774/200/200.jpg?hmac=J9"
+  },
+  {
+    "id": "7",
+    "name": "Paint",
+    "quantity": 50,
+    "image": "https://fastly.picsum.photos/id/775/200/200.jpg?hmac=J9"
+  },
+  {
+    "id": "8",
+    "name": "Pipes",
+    "quantity": 100,
+    "image": "https://fastly.picsum.photos/id/776/200/200.jpg?hmac=J9"
+  },
+  {
+    "id": "9",
+    "name": "Electrical",
+    "quantity": 200,
+  }
+]
