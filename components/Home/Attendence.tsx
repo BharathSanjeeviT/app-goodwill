@@ -13,6 +13,10 @@ const Attendence = () => {
   const markAttendence = async () => {
     setLoading(true)
     try {
+      if (attendenceStatus) {
+        alert("Attendence already marked")
+        return;
+      }
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
         alert('Permission to access location was denied');
@@ -21,13 +25,23 @@ const Attendence = () => {
       let { coords } = await Location.getCurrentPositionAsync({});
       console.log(coords)
       const { data } = await axios.post(`${API_URL}/attendance/mark`, {
-        u_id: "40a046a8-7297-4a71-ada3-99a35e3b8618",
-        lat: "170",
-        lng: "170"
+        token: uid,
+        lat: coords.latitude,
+        lng: coords.longitude
       })
       console.log(data)
-    } catch (err) {
-      console.log(err)
+      if (attendenceStatus === null) {
+        setAttendenceStatus(false)
+      } else if (!attendenceStatus) {
+        setAttendenceStatus(true)
+      }
+      alert("Attendence Marked")
+    } catch (err: any) {
+      if (err.response.status === 401) {
+        alert("You are not in the range of any site")
+      }else if (err.response.status === 400) {
+        alert("Please wait for 8 hours to close the attendence")
+      }
     } finally {
       setLoading(false)
     }
@@ -41,7 +55,6 @@ const Attendence = () => {
         <View>
           {
             loading ?
-
               <View className='flex flex-row justify-center items-center'>
                 <Text className='text-xl text-center text-white py-4 font-semibold mr-1'> Loading... </Text>
               </View> :

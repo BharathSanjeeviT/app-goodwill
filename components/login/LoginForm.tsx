@@ -27,12 +27,11 @@ export const LoginForm = ({ setDetails, setUid }: { setDetails: React.Dispatch<S
             "password": pass
           }
         )
-        console.log(data)
         if (data?.user?.adhaar_no === null || data?.user?.adhaar_no === "") {
-          setUid(data?.user?.u_id)
+          setUid(data?.token)
           setDetails(true)
         } else {
-          signIn(data?.user?.u_id)
+          signIn(data?.token)
         }
       } catch (err) {
         if (axios.isAxiosError(err) && err.response?.status == 400) {

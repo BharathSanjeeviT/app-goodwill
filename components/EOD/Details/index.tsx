@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, ScrollView, Text, TextInput, TouchableOpacity, Image } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
@@ -6,7 +6,10 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import NavBar from "@components/NavBar";
 import "react-native-get-random-values";
 import { uploadFilesToS3 } from "@utils/AWSHelper"
-import { BUCKET_NAME } from '@utils/config';
+import { API_URL, BUCKET_NAME } from '@utils/config';
+import axios from 'axios';
+import { useChangedProducts, useSession, useSite } from '@utils/store';
+import { useRouter } from 'expo-router';
 
 interface AssignedType {
   worker: string;
@@ -16,37 +19,63 @@ interface AssignedType {
 const Details = () => {
   const [tquantity, setTquantity] = useState("")
   const [assigned, setAssigned] = useState<Array<AssignedType>>([]);
-  const [valueArr, setValueArr] = useState([
-    'mason',
-    'carpenter',
-    'electrician',
-    'plumber',
-    'painter'
-  ]);
+  const [fetching, setFetching] = useState(true);
+  const [valueArr, setValueArr] = useState<Array<string>>([]);
+  const router = useRouter()
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data } = await axios.get(`${API_URL}/workers`)
+        data.workers.map((item: { worker: string }) => {
+          setValueArr((prev) => [...prev, item.worker])
+        })
+      } catch (err) {
+        console.log(err)
+      } finally {
+        setFetching(false)
+      }
+    })()
+  }, [])
   const [selectedWorker, setSelectedWorker] = useState<string | undefined>(valueArr[0])
   const [image, setImage] = useState<Array<string> | null>(null);
   const [loading, setLoading] = useState(false);
-  const [uploadedURLs, setUploadedURLs] = useState<Array<string>>([]);
+  const { changedOnes } = useChangedProducts()
+
+  const { site_id } = useSite()
+  const { uid } = useSession()
 
   const uploadImages = async () => {
-    if (image) {
-      setLoading(true)
-      await Promise.all(image.map(async (item) => {
-        try {
-          const fileExtension = item.split('.').pop();
-          const fileName = `${Date.now()}.${fileExtension}`;
-          const fileBlob = await fetch(item).then((res) => res.blob());
-          await uploadFilesToS3(BUCKET_NAME, fileName, fileBlob);
-          setUploadedURLs((prev) => [...prev, `https://${BUCKET_NAME}.s3.ap-south-1.amazonaws.com/${fileName}`]);
-        } catch (error) {
-          console.warn(error)
-        } finally {
-          setLoading(false)
-        }
-      }))
-      console.log(uploadedURLs)
-    } else {
-      alert("Please add images")
+    try {
+      if (image) {
+        setLoading(true)
+        const uploadedURLs: Array<string> = []
+        await Promise.all(image.map(async (item) => {
+          try {
+            const fileExtension = item.split('.').pop();
+            const fileName = `${Date.now()}.${fileExtension}`;
+            const fileBlob = await fetch(item).then((res) => res.blob());
+            await uploadFilesToS3(BUCKET_NAME, fileName, fileBlob);
+            uploadedURLs.push(`https://${BUCKET_NAME}.s3.ap-south-1.amazonaws.com/${fileName}`);
+          } catch (error) {
+            console.warn(error)
+          } 
+        }))
+        await axios.post(`${API_URL}/site/eod`, {
+          s_id: site_id,
+          token: uid,
+          images: uploadedURLs,
+          workers: assigned,
+          inv: changedOnes
+        })
+        alert("EOD submitted successfully")
+        router.push('/')
+      } else {
+        alert("Please add images")
+      }
+    } catch (err) {
+      console.log(err)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -102,7 +131,7 @@ const Details = () => {
 
   const removeField = (worker: string) => {
     setAssigned(assigned.filter((item) => item.worker !== worker));
-    setValueArr([...valueArr, worker]);
+    setValueArr((prev) => [...prev, worker]);
     setSelectedWorker(worker);
   }
 
@@ -113,72 +142,75 @@ const Details = () => {
         <Text className='text-center text-xl my-3'>
           Workers Details
         </Text>
-        <View className='flex flex-row mx-3 my-2'>
-          <View className='w-7/12 px-2 rounded-lg mx-3 border'>
-            <Picker
-              selectedValue={selectedWorker}
-              onValueChange={(itemValue) =>
-                setSelectedWorker(itemValue)
-              }
-            >
-              {valueArr.map((item, idx) => {
-                return (
-                  <Picker.Item label={item} value={item} key={idx} />
-                );
-              })}
-            </Picker>
-          </View>
-          <View className='basis-1/3'>
-            <TextInput
-              className='border rounded-lg p-2'
-              placeholder='Count'
-              keyboardType='numeric'
-              value={tquantity}
-              onChangeText={(text) => setTquantity(text)}
-            />
-          </View>
-        </View>
-        <View className="flex flex-row justify-center items-center">
-          <TouchableOpacity
-            className="bg-blue-500 py-3 px-4 rounded-lg mt-2"
-            onPress={createField}
-          >
-            <Text
-              className="text-white text-md"
-            >
-              Create
-            </Text>
-          </TouchableOpacity>
-        </View>
+        {fetching ? <Text>Loading...</Text> :
+          <View>
+            <View className='flex flex-row mx-3 my-2'>
+              <View className='w-7/12 px-2 rounded-lg mx-3 border'>
+                <Picker
+                  selectedValue={selectedWorker}
+                  onValueChange={(itemValue) =>
+                    setSelectedWorker(itemValue)
+                  }
+                >
+                  {valueArr.map((item, idx) => {
+                    return (
+                      <Picker.Item label={item} value={item} key={idx} />
+                    );
+                  })}
+                </Picker>
+              </View>
+              <View className='basis-1/3'>
+                <TextInput
+                  className='border rounded-lg p-2'
+                  placeholder='Count'
+                  keyboardType='numeric'
+                  value={tquantity}
+                  onChangeText={(text) => setTquantity(text)}
+                />
+              </View>
+            </View>
+            <View className="flex flex-row justify-center items-center">
+              <TouchableOpacity
+                className="bg-blue-500 py-3 px-4 rounded-lg mt-2"
+                onPress={createField}
+              >
+                <Text
+                  className="text-white text-md"
+                >
+                  Create
+                </Text>
+              </TouchableOpacity>
+            </View>
 
-        <View>
-          {
-            assigned.map((item) => {
-              return (
-                <View className='flex flex-row mx-3 my-2'>
-                  <TouchableOpacity className='flex items-center justify-center'
-                    onPress={() => removeField(item.worker)}
-                  >
-                    <AntDesign name="close" size={20} color="black" />
-                  </TouchableOpacity>
-                  <View className='w-1/2 px-2 border rounded-lg mx-3 flex justify-center items-center'>
-                    <Text>
-                      {item.worker}
-                    </Text>
-                  </View>
-                  <View className='basis-1/3'>
-                    <View className='border-2 border-gray-300 rounded-lg p-2'>
-                      <Text>
-                        {item.quantity}
-                      </Text>
+            <View>
+              {
+                assigned.map((item) => {
+                  return (
+                    <View className='flex flex-row mx-3 my-2'>
+                      <TouchableOpacity className='flex items-center justify-center'
+                        onPress={() => removeField(item.worker)}
+                      >
+                        <AntDesign name="close" size={20} color="black" />
+                      </TouchableOpacity>
+                      <View className='w-1/2 px-2 border rounded-lg mx-3 flex justify-center items-center'>
+                        <Text>
+                          {item.worker}
+                        </Text>
+                      </View>
+                      <View className='basis-1/3'>
+                        <View className='border-2 border-gray-300 rounded-lg p-2'>
+                          <Text>
+                            {item.quantity}
+                          </Text>
+                        </View>
+                      </View>
                     </View>
-                  </View>
-                </View>
-              )
-            })
-          }
-        </View>
-
+                  )
+                })
+              }
+            </View>
+          </View>
+        }
         <Text className='text-center text-xl mt-2'>
           Prodcutivity Details
         </Text>
@@ -210,7 +242,7 @@ const Details = () => {
         </View>
       </ScrollView>
 
-      <View className="absolute bottom-0 w-full">
+      <View className="absolute bottom-3 w-full">
         <TouchableOpacity
           className="bg-[#fc8019] flex justify-center items-center py-3 rounded-lg w-full"
           disabled={loading}

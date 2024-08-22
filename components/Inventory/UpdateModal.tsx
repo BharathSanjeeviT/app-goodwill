@@ -1,23 +1,39 @@
-import { useProduct } from "@utils/store"
+import { API_URL } from "@utils/config";
+import { useProduct, useSession, useSite } from "@utils/store"
+import axios from "axios";
 import React, { useState } from "react"
 import { Text, TextInput, TouchableOpacity, View, Pressable, ToastAndroid } from "react-native"
 
-const UpdateInventoryModal = ({ setOpenModal }: {
+const UpdateInventoryModal = ({ setOpenModal, addQuantityToData }: {
   setOpenModal: React.Dispatch<React.SetStateAction<boolean>>,
+  addQuantityToData: (name: string, quan: number) => void
 }) => {
-  const { name, id } = useProduct()
+  const { name } = useProduct()
+  const { uid } = useSession()
+  const { site_id } = useSite()
   const [loading, setLoading] = useState(false)
   const [quantity, setQuantity] = useState("")
   const submit = async () => {
-    setLoading(true)
-    setTimeout(() => {
-      setOpenModal(false)
+    try{
+      setLoading(true)
+      const { data } = await axios.put(`${API_URL}/inventory/`, {
+        token: uid,
+        s_id: site_id,
+        product: name,
+        quantity: parseInt(quantity)
+      })
+      console.log(data)
+      addQuantityToData(name, parseInt(quantity))
+      alert("Prodcut updated sucessfully")
+    }catch(err){
+      console.log(err)
+    }finally{
       setLoading(false)
-      ToastAndroid.show("Prodcut updated sucessfully", ToastAndroid.SHORT)
-    }, 3000)
+      setOpenModal(false)
+    }
   }
   return (
-    <Pressable className="absolute top-20 left-0 right-0 bottom-0 z-10 w-full h-full flex justify-center items-center bg-[#00000050]"
+    <Pressable className="absolute top-20 left-0 right-0 bottom-0 z-20 w-full h-screen flex justify-center items-center bg-[#00000050]"
       onPress={() => setOpenModal(false)}
     >
       <Pressable className="flex bg-white rounded-lg py-6 px-5">

@@ -6,7 +6,7 @@ import Entypo from '@expo/vector-icons/Entypo';
 const NavBar = ({ link }: { link: string }) => {
   const router = useRouter()
   return (
-    <View className="absolute top-0 left-0 bg-[#405d72] w-full py-5 px-3 flex flex-row items-center justify-center h-20">
+    <View className="absolute top-0 left-0 bg-[#405d72] w-full py-5 px-3 flex flex-row items-center justify-center h-20 z-10">
       <TouchableOpacity
         className="absolute left-3 flex flex-row justify-center"
         onPress={() => {

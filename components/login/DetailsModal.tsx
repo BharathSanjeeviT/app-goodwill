@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useSession } from "@utils/store";
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Text, View, TextInput, Pressable, KeyboardAvoidingView, ToastAndroid } from 'react-native';
+import { Text, View, TextInput, Pressable, KeyboardAvoidingView } from 'react-native';
 import { Loader } from '@components/LottieLoading';
 
 export const DetailsModal = ({ uid }: { uid: string }) => {
@@ -22,8 +22,8 @@ export const DetailsModal = ({ uid }: { uid: string }) => {
     if (name! && anum!) {
       if (regex.test(anum)) {
         try {
-          const { data } = await axios.put(`${API_URL}/u/update`, {
-            u_id: uid,
+          await axios.put(`${API_URL}/u/update`, {
+            token: uid,
             adhaar_no: anum,
             name
           })

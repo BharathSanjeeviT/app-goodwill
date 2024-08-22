@@ -53,7 +53,7 @@ const Menu = () => {
         {
           is_super &&
           <TouchableOpacity className="w-11/12 rounded-lg flex flex-row justify-center items-center py-4 bg-[#fc8019]"
-            onPress={() => router.push("eod-submit")}
+            onPress={() => router.push("/eod-submit")}
           >
             <Text className="font-semibold text-lg text-white mx-3">
               Submit EOD
@@ -62,7 +62,9 @@ const Menu = () => {
           </TouchableOpacity>
         }
 
-        <TouchableOpacity className='w-11/12 bg-[#405d72] rounded-lg flex flex-row justify-center items-center py-4'>
+        <TouchableOpacity className='w-11/12 bg-[#405d72] rounded-lg flex flex-row justify-center items-center py-4'
+          onPress={() => router.push("/broadcast")}
+        >
           <Text className='text-center font-semibold text-white text-xl mx-3'>
             Boradcast
           </Text>

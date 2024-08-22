@@ -1,24 +1,18 @@
 import { useProduct, useUpdatedProducts   } from "@utils/store"
-import React, { useState } from "react";
+import { Inventory } from "@utils/types";
+import React from "react";
 import { View, Text, TouchableOpacity, Image } from "react-native"
-
-interface InventoryItems {
-  name: string;
-  quantity: number;
-  image?: string;
-  id: string;
-}
 
 const EODItemComp = ({ itemData, setOpenModal }: {
   setOpenModal: React.Dispatch<React.SetStateAction<boolean>>,
-  itemData: InventoryItems
+  itemData: Inventory 
 }) => {
 
   const { setProduct } = useProduct();
   const { getUpatedItem } = useUpdatedProducts()
 
   const updateItems = () => {
-    setProduct(itemData.name, itemData.id, itemData.quantity)
+    setProduct(itemData.product, itemData.product, itemData.quantity)
     setOpenModal(true)
   }
 
@@ -27,10 +21,10 @@ const EODItemComp = ({ itemData, setOpenModal }: {
       <View className="basis-5/12 flex items-center m-3">
         <View className="w-full h-32">
           {
-            itemData.image &&
+            itemData.url &&
             <Image
               className="h-full w-full"
-              source={{ uri: itemData.image }}
+              source={{ uri: itemData.url }}
             />
           }
         </View>
@@ -38,7 +32,7 @@ const EODItemComp = ({ itemData, setOpenModal }: {
 
       <View className="basis-5/12 flex justify-between items-center">
         <Text className="text-lg font-semibold">
-          {itemData.name}
+          {itemData.product}
         </Text>
 
         <View className="flex flex-col my-2">
@@ -47,7 +41,7 @@ const EODItemComp = ({ itemData, setOpenModal }: {
           </Text>
           <View className="flex flex-row justify-center items-center">
             <Text className="text-black text-md py-1 font-semibold mx-2">
-              Updated : {getUpatedItem(itemData.id)}
+              Removed : {getUpatedItem(itemData.product)}
             </Text>
           </View>
         </View>
@@ -56,7 +50,7 @@ const EODItemComp = ({ itemData, setOpenModal }: {
           onPress={updateItems}
         >
           <Text className="font-semibold text-white">
-            Update
+            Remove
           </Text>
         </TouchableOpacity>
 

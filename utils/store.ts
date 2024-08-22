@@ -14,7 +14,7 @@ interface SiteType {
   site_id: string | null,
   attendenceStatus: boolean | null,
   is_super: boolean | null,
-  setAttendenceStatus : (status : boolean) => void,
+  setAttendenceStatus: (status: boolean) => void,
   setInfo: (site_id: string, attendenceStatus: boolean | null, is_super: boolean) => void,
 }
 
@@ -27,23 +27,23 @@ interface AuthType {
 
 interface UpdateItems {
   updatedItems: Array<{
-    id: string,
+    product: string,
     quantity: number
   }>,
-  getUpatedItem: (id: string) => number | undefined,
+  getUpatedItem: (product: string) => number | undefined,
   initValue: (value: Array<{
-    id: string,
+    product: string,
     quantity: number
   }>) => void,
-  updateItem: (id: string, quantity: number) => void
+  updateItem: (product: string, quantity: number) => void
 }
 
 interface ChangedProducts {
   changedOnes: Array<{
-    id: string,
+    product: string,
     quantity: number
   }>,
-  addChangedOne: (id: string, quantity: number) => void,
+  addChangedOne: (product: string, quantity: number) => void,
 }
 
 const useSiteStore = create<SiteType>((set) => ({
@@ -62,8 +62,10 @@ const useSiteStore = create<SiteType>((set) => ({
 
 const useUpateItemStore = create<ChangedProducts>((set) => ({
   changedOnes: [],
-  addChangedOne: (id, quantity) => set((state) => ({
-    changedOnes: [...state.changedOnes, { id, quantity }]
+  addChangedOne: (product, quantity) => set((state) => ({
+    changedOnes: state.changedOnes.some(item => item.product === product) ?
+      state.changedOnes.map(item => item.product === product ? { product, quantity } : item) :
+      [...state.changedOnes, { product, quantity }]
   }))
 }))
 
@@ -74,23 +76,13 @@ const useUpdateItemStore = create<UpdateItems>((set, get) => ({
   }),
   getUpatedItem: (id: string) => {
     const { updatedItems } = get();
-    const item = updatedItems.find(item => item.id === id);
+    const item = updatedItems.find(item => item.product === id);
     return item ? item.quantity : undefined;
   },
-  updateItem: (id, quantity) => set((state) => ({
-    updatedItems: state.updatedItems.map(item => item.id === id ? { id, quantity } : item)
+  updateItem: (product, quantity) => set((state) => ({
+    updatedItems: state.updatedItems.map(item => item.product === product ? { product, quantity } : item)
   }))
 }))
-
-const useSite = () => {
-  const { site_id, setInfo, attendenceStatus, setAttendenceStatus, is_super } = useSiteStore(); 
-  return { site_id, setInfo, attendenceStatus, setAttendenceStatus, is_super };
-}
-
-const useChangedProducts = () => {
-  const { changedOnes, addChangedOne } = useUpateItemStore()
-  return { changedOnes, addChangedOne };
-}
 
 const useAuthStore = create<AuthType>((set) => ({
   uid: null,
@@ -114,6 +106,16 @@ const useProductStore = create<ProductType>((set) => ({
   }),
 }))
 
+const useSite = () => {
+  const { site_id, setInfo, attendenceStatus, setAttendenceStatus, is_super } = useSiteStore();
+  return { site_id, setInfo, attendenceStatus, setAttendenceStatus, is_super };
+}
+
+const useChangedProducts = () => {
+  const { changedOnes, addChangedOne } = useUpateItemStore()
+  return { changedOnes, addChangedOne };
+}
+
 const useUpdatedProducts = () => {
   const { updatedItems, initValue, updateItem, getUpatedItem } = useUpdateItemStore()
   return { updatedItems, initValue, updateItem, getUpatedItem };
@@ -126,7 +128,7 @@ const useProduct = () => {
 
 const useSession = () => {
   const { uid, loading, signIn, setLoading } = useAuthStore();
-  const [[storageSession, storageLoading], setStorageSession] = useStorage('jdskfh');
+  const [[storageSession, storageLoading], setStorageSession] = useStorage('kldkldjflksdfj');
 
   useEffect(() => {
     if (!storageLoading) {
