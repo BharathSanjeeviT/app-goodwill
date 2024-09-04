@@ -178,7 +178,7 @@ const getstartend = (date: Date) => {
 
 function utcToIst(utcTimeStr: string): Date {
     const utcDate = new Date(utcTimeStr); // 'Z' indicates UTC time
-    const istOffsetMs = 5 * 60 * 60 * 1000 + 30 * 60 * 1000; // 5 hours and 30 minutes in milliseconds
+    const istOffsetMs = 6 * 60 * 60 * 1000 + 30 * 60 * 1000; // 5 hours and 30 minutes in milliseconds
     const istDate = new Date(utcDate.getTime() + istOffsetMs);
     
     return istDate;

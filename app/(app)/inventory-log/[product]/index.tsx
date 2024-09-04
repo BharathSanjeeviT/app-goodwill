@@ -7,12 +7,11 @@ import axios from "axios";
 import { API_URL } from "@utils/config";
 import { useSite, utcToIst } from "@utils/store";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { format } from "date-fns";
 
 const Product = () => {
   const [load, setLoad] = useState(true);
-  const [date, setDate] = useState<Date>(
-    new Date(new Date().setDate(new Date().getDate() - 1)),
-  );
+  const [date, setDate] = useState<Date>(new Date(Date.now()));
   const [log, setLog] = useState<Array<LogType>>([]);
   const [plog, setPlog] = useState<Array<PLogType>>([]);
   const [closeFrom, setCloseFrom] = useState(false);
@@ -26,7 +25,7 @@ const Product = () => {
         const { data } = await axios.post(`${API_URL}/inventory/product`, {
           s_id: site_id,
           product,
-          date: date.toLocaleDateString(),
+					date : format(date, "yyyy-MM-dd")
         });
         setLog(data.log);
         console.log(data);
@@ -69,13 +68,15 @@ const Product = () => {
 
   const { product } = useLocalSearchParams();
 
-  const getProductLog = async () => {
+  const getProductLog = async (ldate: Date) => {
     try {
       setLoad(true);
+      console.log(ldate.toLocaleDateString());
+      setDate(ldate);
       const { data } = await axios.post(`${API_URL}/inventory/product`, {
         s_id: site_id,
         product,
-        date: date.toLocaleDateString(),
+				date: format(ldate, "yyyy-MM-dd")
       });
       console.log(data);
       setLog(data.log);
@@ -114,9 +115,8 @@ const Product = () => {
                 mode="date"
                 display="default"
                 onChange={(date) => {
-                  setDate(new Date(date.nativeEvent.timestamp));
                   setCloseFrom(false);
-                  getProductLog();
+                  getProductLog(new Date(date.nativeEvent.timestamp));
                 }}
               />
             )}
@@ -124,7 +124,7 @@ const Product = () => {
           <View className="flex justify-center items-center my-5"></View>
           {plog.length === 0 ? (
             <View className="text-center text-lg font-semibold mb-3">
-              <Text>No logs found</Text>
+              <Text className="text-center">No logs found</Text>
             </View>
           ) : (
             plog.map((item, idx) => (
@@ -134,7 +134,7 @@ const Product = () => {
                     return (
                       <View key={idx} className="bg-white my-1 rounded m-2">
                         <Text className="py-3 text-center">
-                          {utcToIst(log.receive_time).toLocaleTimeString()}-{" "}
+                          {utcToIst(log.receive_time).toLocaleTimeString().slice(0, 8)}-{" "}
                           {log.quant} units{" "}
                           {log.sender === site_id
                             ? log.receiver_name !== null
@@ -142,7 +142,7 @@ const Product = () => {
                               : "used"
                             : log.sender_name !== null
                               ? `received from ${log.sender_name}`
-                              : `imported`}{" "}
+                              : `added`}{" "}
                         </Text>
                       </View>
                     );

@@ -68,7 +68,7 @@ const Details = () => {
 				console.log(coords);
 				const lat = coords.latitude;
 				const lng = coords.longitude;
-				await axios.post(`${API_URL}/site/eod`, {
+				const body ={
 					s_id: site_id,
 					lat,
 					lng,
@@ -76,7 +76,9 @@ const Details = () => {
 					images: uploadedURLs,
 					workers: assigned,
 					inv: changedOnes,
-				});
+				}
+				console.log(body)
+				await axios.post(`${API_URL}/site/eod`, body);
 				alert("EOD submitted successfully");
 				router.push("/");
 			} else {

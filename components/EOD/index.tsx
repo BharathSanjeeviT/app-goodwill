@@ -50,7 +50,7 @@ const EODComponent = () => {
 
 	useEffect(() => {
 		const initUpdatedProducts: Array<{ product: string; quantity: number }> =
-			data.map(({ product }) => ({ product, quantity: 0 }));
+			data.map(({ product, quantity }) => ({ product, quantity }));
 		initValue(initUpdatedProducts);
 	}, [data]);
 

@@ -18,13 +18,11 @@ const ReqModal = ({
   submit,
   product,
   setProduct,
-  fetchData,
 }: {
   closeModal: () => void;
   quantity: string;
   setQuantity: React.Dispatch<React.SetStateAction<string>>;
   submit: () => void;
-  fetchData: () => void;
   product: string;
   setProduct: React.Dispatch<React.SetStateAction<string>>;
 }) => {
@@ -41,7 +39,6 @@ const ReqModal = ({
         setProducts(
           data.inventory.map((item: { product: string }) => item.product),
         );
-				fetchData();
         console.log(data.inventory);
       } catch (err) {
         console.log(err);

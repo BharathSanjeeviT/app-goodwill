@@ -24,13 +24,13 @@ const AttendenceEntry = (ele: AttendanceRecord) => {
             <View>
               <Text className="text-md my-1">Check In</Text>
               <Text className="text-xl font-semibold">
-								{utcToIst(ele.check_in).toLocaleTimeString()}
+								{utcToIst(ele.check_in).toLocaleTimeString().slice(0, 8)}
               </Text>
             </View>
             <View>
               <Text className="text-md my-1">Check Out</Text>
               <Text className="text-xl font-semibold">
-                {ele.check_out ? utcToIst(ele.check_out).toLocaleTimeString() : "N/A"}
+                {ele.check_out ? utcToIst(ele.check_out).toLocaleTimeString().slice(0, 8) : "N/A"}
               </Text>
             </View>
           </View>

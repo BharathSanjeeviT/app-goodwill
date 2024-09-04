@@ -10,11 +10,16 @@ const Attendence = () => {
 	const { attendenceStatus, setAttendenceStatus } = useSite();
 	const [loading, setLoading] = useState(false);
 	const { uid } = useSession();
+	const { is_super } = useSite()
 	const markAttendence = async () => {
 		setLoading(true);
 		try {
 			if (attendenceStatus) {
 				alert("Attendence already marked");
+				return;
+			}
+			if(attendenceStatus === false && is_super){
+				alert("Submit EOD to close ATTENDENCE")
 				return;
 			}
 			let { status } = await Location.requestForegroundPermissionsAsync();

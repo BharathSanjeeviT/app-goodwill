@@ -23,9 +23,11 @@ const UpdateInventoryModal = ({
 	const [newquan, setNewquan] = useState("");
 	const submit = async () => {
 		setOpenModal(false);
-		if (quantity !== parseInt(newquan) && parseInt(newquan) !== 0) {
-			addChangedOne(id, parseInt(newquan));
-			updateItem(id, parseInt(newquan));
+		if (quantity !== parseInt(newquan) && parseInt(newquan) !== 0 && parseInt(newquan) <= quantity) {
+			addChangedOne(id, quantity - parseInt(newquan));
+			updateItem(id, quantity - parseInt(newquan));
+		}else if(parseInt(newquan) > quantity){
+			alert("You can remove more than the limit")
 		}
 		console.log(changedOnes);
 	};
@@ -36,7 +38,7 @@ const UpdateInventoryModal = ({
 		>
 			<Pressable className="flex bg-white rounded-lg py-8 px-6">
 				<View className="items-center justify-center flex">
-					<Text className="font-semibold text-xl">Update {name}</Text>
+					<Text className="font-semibold text-xl">Remove {name}</Text>
 				</View>
 				<View className="flex flex-row justify-center items-center pt-6 pb-5">
 					<TextInput

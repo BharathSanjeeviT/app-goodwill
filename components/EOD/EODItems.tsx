@@ -37,7 +37,7 @@ const EODItemComp = ({
 					</Text>
 					<View className="flex flex-row justify-center items-center">
 						<Text className="text-black text-md py-1 font-semibold mx-2">
-							Removed : {getUpatedItem(itemData.product)}
+							After removing : {getUpatedItem(itemData.product)}
 						</Text>
 					</View>
 				</View>

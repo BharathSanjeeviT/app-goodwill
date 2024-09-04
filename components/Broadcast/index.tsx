@@ -5,7 +5,7 @@ import ReqModal from "@components/Broadcast/CreateRequest";
 import axios from "axios";
 import { API_URL } from "@utils/config";
 import { BroadcastsType } from "@utils/types";
-import { useSession, useSite } from "@utils/store";
+import { useSession, useSite, utcToIst } from "@utils/store";
 
 const Broadcast = () => {
   const [reqModal, setReqModal] = useState(false);
@@ -16,7 +16,6 @@ const Broadcast = () => {
   const [load, setLoad] = useState(false);
   const { site_id, is_super } = useSite();
   const { uid } = useSession();
-  const scrollViewRef = useRef<ScrollView | null>(null);
 
   const closeRequestModal = () => {
     if (reqModal) {
@@ -55,16 +54,17 @@ const Broadcast = () => {
         quantity: reqquan,
         token: uid,
       });
-      fetchData();
       console.log(data);
+      alert("Request Sent");
+      fetchData();
     } catch (err) {
       console.log(err);
     } finally {
       setLoad(false);
-			closeRequestModal();
+      closeRequestModal();
     }
   };
-	const { attendenceStatus } = useSite()
+  const { attendenceStatus } = useSite();
 
   return (
     <View className="min-h-screen bg-[#ede3da] flex flex-row pt-20">
@@ -73,7 +73,6 @@ const Broadcast = () => {
         <ReqModal
           closeModal={closeRequestModal}
           quantity={reqquan}
-          fetchData={fetchData}
           setQuantity={setReqquan}
           product={reqData}
           setProduct={setReqData}
@@ -82,23 +81,29 @@ const Broadcast = () => {
       )}
       {load && <Loading />}
       {loading ? (
-        <Text>Loading</Text>
+        <View className="flex h-screen justify-center items-center w-screen">
+          <Text>Loading</Text>
+        </View>
       ) : (
-        <ScrollView
-          ref={scrollViewRef}
-          className="mb-10"
-          onContentSizeChange={() =>
-            scrollViewRef.current?.scrollToEnd({ animated: true })
-          }
-        >
-          {data.map((ele, idx) => {
-            return <Coponenet data={ele} setLoad={setLoad} key={idx} />;
-          })}
+        <ScrollView className="mb-10">
+          {data
+            .slice()
+            .reverse()
+            .map((ele, idx) => {
+              return (
+                <Coponenet
+                  data={ele}
+                  setLoad={setLoad}
+                  key={idx}
+                  fetchData={fetchData}
+                />
+              );
+            })}
         </ScrollView>
       )}
       {is_super && attendenceStatus == false && (
         <TouchableOpacity
-          className="absolute bottom-0 left-0 right-0 bg-orange-500 py-2 rounded-lg flex justify-center items-center w-full"
+          className="absolute bottom-0 left-0 right-0 bg-orange-500 py-2 rounded-lg flex justify-center items-center w-full z-20"
           onPress={openRequestModal}
         >
           <Text className="text-white py-2">Request</Text>
@@ -110,9 +115,11 @@ const Broadcast = () => {
 const Coponenet = ({
   data,
   setLoad,
+  fetchData,
 }: {
   data: BroadcastsType;
   setLoad: React.Dispatch<React.SetStateAction<boolean>>;
+  fetchData: () => void;
 }) => {
   const { site_id, is_super } = useSite();
   const { uid } = useSession();
@@ -123,16 +130,18 @@ const Coponenet = ({
     }
     try {
       setLoad(true);
-      const obj = {
-      };
+      const obj = {};
       console.log(obj);
       const resData = await axios.put(`${API_URL}/product`, {
         sender: site_id,
         p_id: data.p_id,
         token: uid,
-			});
+      });
       console.log(resData.data);
+      alert("Request satisfied!");
+      fetchData();
     } catch (err) {
+      alert("You dont have enough items to send");
       console.log(err);
     } finally {
       setLoad(false);
@@ -146,26 +155,40 @@ const Coponenet = ({
         p_id: data.p_id,
       });
       console.log(recData.data);
+      alert("Product updated sucessfully!");
+      fetchData();
     } catch (err) {
       console.log(err);
     } finally {
       setLoad(false);
     }
   };
-	const { attendenceStatus } = useSite()
+  const { attendenceStatus } = useSite();
   return (
     <View
-      className={`w-screen flex flex-col ${site_id == data.receiver ? "items-end" : "items-start"} px-4 py-2`}
+      className={`w-screen flex flex-col ${site_id == data.receiver ? "items-end" : "items-start"} px-4 py-2 z-20`}
     >
       <Text className="text-gray-800 px-2">{data.receiver_name}</Text>
-      <View className="border border-gray-300 rounded-lg p-4 mt-2 bg-white shadow-sm w-5/12">
+      <View className="border border-gray-300 rounded-lg p-4 mt-2 bg-white shadow-sm">
         <View className="flex flex-row justify-between mb-2">
-          <Text className="text-gray-600 font-medium mr-1">Product</Text>
+          <Text className="text-gray-600 font-medium mr-3">Product</Text>
           <Text className="text-gray-800">{data.p_name}</Text>
         </View>
         <View className="flex flex-row justify-between mb-2">
-          <Text className="text-gray-600 font-medium mr-1">Quantity</Text>
+          <Text className="text-gray-600 font-medium mr-3">Quantity</Text>
           <Text className="text-gray-800">{data.quant}</Text>
+        </View>
+        <View className="flex flex-row justify-between mb-2">
+          <Text className="text-gray-600 font-medium mr-3">Req Date</Text>
+          <Text className="text-gray-800">
+            {utcToIst(data.requested_time).toLocaleDateString()}
+          </Text>
+        </View>
+        <View className="flex flex-row justify-between mb-2">
+          <Text className="text-gray-600 font-medium mr-3">Req Time</Text>
+          <Text className="text-gray-800">
+            {utcToIst(data.requested_time).toLocaleTimeString()}
+          </Text>
         </View>
         <View className="flex flex-row justify-between mb-2 items-center">
           <Text className="text-gray-600 font-medium mr-1 text-center">
@@ -191,7 +214,7 @@ const Coponenet = ({
               )
             ) : site_id == data.receiver ? (
               <Text className="text-gray-500">Pending</Text>
-            ) : (is_super && (attendenceStatus === false)) ? (
+            ) : is_super && attendenceStatus === false ? (
               <TouchableOpacity
                 className="bg-blue-500 py-2 px-3 rounded-lg"
                 onPress={satisfyRequest}
